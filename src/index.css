@@ -1,0 +1,558 @@
+@import "tailwindcss";
+
+/* Dark Calmo com Azul Profundo (default) */
+:root {
+  --aw-bg: #0f1115;
+  --aw-card: #161a22;
+  --aw-border: #232a36;
+  --aw-text: #e6eaf0;
+  --aw-text-muted: #8b949e;
+  --aw-accent: #4f7fff;
+  --aw-positive: #3fb950;
+  --aw-danger: #f85149;
+  /* Mesa de investigação: nodes mais visíveis no escuro. Handle neutro sem filtro; azul só com filtro ativo. */
+  --aw-mesa-node-bg: #1c2128;
+  --aw-mesa-node-border: #404852;
+  --aw-mesa-node-handle: #6b7280;
+  --aw-mesa-edge: #6b7280;
+}
+
+/* Light (alternativa) */
+[data-theme="light"] {
+  --aw-bg: #fafafa;
+  --aw-card: #ffffff;
+  --aw-border: #e4e4e7;
+  --aw-text: #18181b;
+  --aw-text-muted: #71717a;
+  --aw-accent: #4f7fff;
+  --aw-positive: #3fb950;
+  --aw-danger: #f85149;
+  --aw-mesa-node-bg: #ffffff;
+  --aw-mesa-node-border: #e4e4e7;
+  --aw-mesa-node-handle: #a1a1aa;
+  --aw-mesa-edge: #a1a1aa;
+}
+
+@layer base {
+  body {
+    background-color: var(--aw-bg);
+    color: var(--aw-text);
+    @apply antialiased;
+  }
+}
+
+/* Controles da mesa (cadeado): alinhado ao tema */
+.react-flow__controls.mesa-controls-theme,
+.react-flow__controls.mesa-controls-theme .react-flow__controls-button {
+  background-color: var(--aw-card) !important;
+  border-color: var(--aw-border) !important;
+  color: var(--aw-text-muted) !important;
+  fill: var(--aw-text-muted) !important;
+}
+.react-flow__controls.mesa-controls-theme .react-flow__controls-button:hover {
+  background-color: var(--aw-border) !important;
+  color: var(--aw-text) !important;
+  fill: var(--aw-text) !important;
+}
+
+/* Na Mesa de Investigação, o fundo do React Flow fica transparente para mostrar o espaço atrás */
+.mesa-investigacao-canvas .react-flow,
+.mesa-investigacao-canvas .react-flow__background {
+  background-color: transparent !important;
+}
+
+/* Fundo espacial atrás do canvas da Mesa de Investigação — mais vivo: nebulosas e estrelas com movimento */
+.mesa-space-bg {
+  position: relative;
+  background-color: #05060a;
+  overflow: hidden;
+}
+/* Camada base: nebulosas mais visíveis com drift lento */
+.mesa-space-bg__nebulas {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% -10%, rgba(79, 127, 255, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 50% at 85% 20%, rgba(88, 28, 135, 0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 45% at 15% 70%, rgba(30, 58, 138, 0.12) 0%, transparent 48%),
+    radial-gradient(ellipse 60% 40% at 70% 85%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.5) 0%, transparent 70%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  animation: mesa-nebula-drift 45s ease-in-out infinite;
+  pointer-events: none;
+}
+/* Segunda camada de nebulosas (movimento em sentido contrário, parallax) */
+.mesa-space-bg__nebulas-2 {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 75% 60%, rgba(139, 92, 246, 0.08) 0%, transparent 45%);
+  background-size: 100% 100%, 100% 100%;
+  animation: mesa-nebula-drift-2 60s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mesa-nebula-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(2%, 1.5%) scale(1.02); opacity: 0.95; }
+  66% { transform: translate(-1.5%, 2%) scale(0.98); opacity: 1; }
+}
+@keyframes mesa-nebula-drift-2 {
+  0%, 100% { transform: translate(0, 0); opacity: 1; }
+  50% { transform: translate(-3%, -2%); opacity: 0.9; }
+}
+/* Estrelas: várias camadas com twinkle em velocidades diferentes */
+.mesa-space-bg__stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 42% 68%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1px 1px at 62% 18%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 78% 55%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 12% 78%, rgba(255, 255, 255, 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 88% 88%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1px 1px at 35% 45%, rgba(255, 255, 255, 0.25), transparent),
+    radial-gradient(1px 1px at 55% 75%, rgba(255, 255, 255, 0.28), transparent);
+  background-size: 220% 220%, 180% 180%, 200% 200%, 160% 160%, 240% 240%, 190% 190%, 210% 210%, 170% 170%;
+  background-position: 0% 0%, 30% 50%, 60% 10%, 80% 70%, 15% 85%, 75% 20%, 40% 40%, 65% 60%;
+  animation: mesa-stars-twinkle 8s ease-in-out infinite;
+  pointer-events: none;
+}
+.mesa-space-bg__stars-slow {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 25% 35%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 70% 25%, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1.2px 1.2px at 50% 90%, rgba(255, 255, 255, 0.28), transparent),
+    radial-gradient(1px 1px at 8% 50%, rgba(255, 255, 255, 0.32), transparent);
+  background-size: 200% 200%, 180% 180%, 220% 220%, 190% 190%;
+  background-position: 10% 20%, 60% 30%, 40% 80%, 5% 60%;
+  animation: mesa-stars-twinkle 14s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mesa-stars-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+/* Planetas: círculos suaves (usados como classes nos elementos no JSX) */
+.mesa-space-planet {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(0.5px);
+}
+.mesa-space-planet--1 {
+  width: min(280px, 25vw);
+  height: min(280px, 25vw);
+  background: radial-gradient(circle at 30% 30%, rgba(79, 127, 255, 0.22), rgba(30, 58, 138, 0.08) 50%, transparent 70%);
+  top: 8%;
+  right: 5%;
+  animation: mesa-planet-pulse 12s ease-in-out infinite;
+}
+.mesa-space-planet--2 {
+  width: min(180px, 18vw);
+  height: min(180px, 18vw);
+  background: radial-gradient(circle at 35% 35%, rgba(139, 92, 246, 0.15), rgba(88, 28, 135, 0.06) 50%, transparent 70%);
+  bottom: 15%;
+  left: 8%;
+  animation: mesa-planet-pulse 15s ease-in-out infinite 1.5s;
+}
+@keyframes mesa-planet-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}
+
+/* Card do resumo da Mesa no Notepad: borda neon, pulse se houver evidências soltas */
+.mesa-resume-card {
+  border-color: rgba(79, 127, 255, 0.35);
+  box-shadow: 0 0 12px rgba(79, 127, 255, 0.12);
+}
+.mesa-resume-card--critical {
+  animation: mesa-resume-card-pulse 2.5s ease-in-out infinite;
+}
+@keyframes mesa-resume-card-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(79, 127, 255, 0.12); border-color: rgba(79, 127, 255, 0.35); }
+  50% { box-shadow: 0 0 18px rgba(234, 179, 8, 0.25); border-color: rgba(234, 179, 8, 0.5); }
+}
+
+/* --- Notas: código inline e bloco (estilo docs/dev) --- */
+:root {
+  --aw-code-bg: #1e1e1e;
+  --aw-code-text: #e6e6e6;
+  --aw-pre-bg: #0d1117;
+}
+[data-theme="light"] {
+  --aw-code-bg: #f0f0f0;
+  --aw-code-text: #24292f;
+  --aw-pre-bg: #f6f8fa;
+}
+
+.nota-preview-prose code,
+.nota-editor-prose code,
+.ProseMirror code {
+  background: var(--aw-code-bg);
+  color: var(--aw-code-text);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.nota-preview-prose pre,
+.nota-editor-prose pre,
+.ProseMirror pre {
+  background: var(--aw-pre-bg);
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid var(--aw-border);
+  margin: 0.75em 0;
+}
+
+.nota-preview-prose pre code,
+.nota-editor-prose pre code,
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* --- Página Senhas: Dark Mode Premium (glassmorphism, grafite, azul marinho) --- */
+.senhas-page {
+  --pw-bg: #0d0f14;
+  --pw-bg-elevated: #13161d;
+  --pw-card: rgba(22, 25, 35, 0.85);
+  --pw-card-solid: #161923;
+  --pw-border: rgba(255, 255, 255, 0.06);
+  --pw-border-hover: rgba(255, 255, 255, 0.1);
+  --pw-text: #f0f2f5;
+  --pw-text-muted: #8b92a0;
+  --pw-accent: #5b8def;
+  --pw-accent-soft: rgba(91, 141, 239, 0.15);
+  --pw-positive: #3fb950;
+  --pw-danger: #f85149;
+  --pw-glass: rgba(18, 22, 30, 0.7);
+  --pw-glass-border: rgba(255, 255, 255, 0.08);
+  --pw-radius: 10px;
+  --pw-radius-sm: 8px;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  background: var(--pw-bg);
+  color: var(--pw-text);
+  min-height: 100%;
+}
+.senhas-page .senhas-chip {
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  border: 1px solid var(--pw-border);
+  background: var(--pw-glass);
+  color: var(--pw-text-muted);
+}
+.senhas-page .senhas-chip:hover {
+  background: var(--pw-border-hover);
+  color: var(--pw-text);
+}
+.senhas-page .senhas-chip.active {
+  background: var(--pw-accent-soft);
+  border-color: var(--pw-accent);
+  color: var(--pw-accent);
+}
+.senhas-page .senhas-card {
+  border-radius: var(--pw-radius);
+  border: 1px solid var(--pw-border);
+  background: var(--pw-card);
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.senhas-page .senhas-card:hover {
+  border-color: var(--pw-border-hover);
+}
+.senhas-page .senhas-input {
+  border-radius: var(--pw-radius-sm);
+  border: 1px solid var(--pw-border);
+  background: var(--pw-card-solid);
+  color: var(--pw-text);
+}
+.senhas-page .senhas-input::placeholder {
+  color: var(--pw-text-muted);
+}
+.senhas-page .senhas-input:focus {
+  outline: none;
+  border-color: var(--pw-accent);
+  box-shadow: 0 0 0 3px var(--pw-accent-soft);
+}
+/* Tags de categoria com cores sutis */
+.senhas-page .pw-tag-trabalho { background: rgba(59, 130, 246, 0.2); color: #7eb8ff; }
+.senhas-page .pw-tag-redes { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+.senhas-page .pw-tag-email { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; }
+.senhas-page .pw-tag-faculdade { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+.senhas-page .pw-tag-jogos { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
+.senhas-page .pw-tag-outros { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+/* Modal overlay */
+.senhas-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: senhas-fade-in 0.2s ease-out;
+}
+@keyframes senhas-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.senhas-modal-panel {
+  border-radius: 12px;
+  border: 1px solid var(--pw-glass-border);
+  background: var(--pw-card-solid);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  max-width: 28rem;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  animation: senhas-scale-in 0.2s ease-out;
+}
+@keyframes senhas-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+/* Ações no card: destaque no hover; sempre visíveis em touch */
+.senhas-page .pw-card-actions {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.senhas-page .pw-card-item:hover .pw-card-actions {
+  opacity: 1;
+}
+@media (hover: none) {
+  .senhas-page .pw-card-actions {
+    opacity: 1;
+  }
+}
+/* Tooltip Copiado! — um único bloco (senha e utilizador) */
+.pw-copy-tooltip {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--pw-positive);
+  background: rgba(63, 185, 80, 0.18);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  pointer-events: none;
+  animation: pw-tooltip-in 0.2s ease-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.pw-copy-tooltip svg {
+  flex-shrink: 0;
+  color: var(--pw-positive);
+  stroke: currentColor;
+}
+/* Posição alternativa: ao lado do botão de copiar utilizador */
+.pw-copy-tooltip--by-user {
+  right: auto;
+  left: 100%;
+  top: 50%;
+  margin-left: 0.25rem;
+  transform: translateY(-50%);
+}
+@keyframes pw-tooltip-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Fluxo da Mesa: 3 colunas (seções | detalhe + próximo passo | comentários) */
+.mesa-flow__grid {
+  display: grid;
+  gap: 1.25rem;
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr);
+  grid-template-areas: "sections detail comments";
+}
+.mesa-flow__sections {
+  grid-area: sections;
+  min-width: 0;
+}
+.mesa-flow__detail {
+  grid-area: detail;
+  min-width: 0;
+}
+.mesa-flow__comments {
+  grid-area: comments;
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .mesa-flow__grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sections"
+      "detail"
+      "comments";
+  }
+}
+
+/* Efeito scanline opcional para ImageNode na mesa de investigação */
+.scanline {
+  position: relative;
+}
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0 0 0 / 0.03) 2px,
+    rgba(0 0 0 / 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* Comentário bloqueado: destaque do cadeado ao tentar arrastar */
+@keyframes comment-lock-bump {
+  0%, 100% { transform: scale(1); color: inherit; }
+  50% { transform: scale(1.4); color: var(--aw-accent); }
+}
+.comment-lock-highlight .comment-lock-icon {
+  animation: comment-lock-bump 0.4s ease-out;
+}
+
+/* Nota (Notepad): editor TipTap + preview */
+.nota-editor-prose.ProseMirror {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.nota-editor-prose.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--aw-text-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+.nota-editor-prose.ProseMirror code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--aw-border);
+}
+.nota-editor-prose.ProseMirror pre code {
+  padding: 0.75rem;
+  display: block;
+}
+
+/* Bloco recolhido: manter inline na mesma linha (não quebrar para nova linha) */
+.nota-editor-prose.ProseMirror .node-maskedBlock,
+.nota-editor-prose.ProseMirror .nota-masked-block-editor {
+  display: inline-flex !important;
+  vertical-align: middle;
+}
+
+.nota-preview-prose {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+.nota-preview-prose p {
+  margin-bottom: 0.5rem;
+}
+.nota-preview-prose ul, .nota-preview-prose ol {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+}
+.nota-preview-prose code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  background: var(--aw-border);
+}
+.nota-preview-prose a {
+  color: var(--aw-accent);
+  text-decoration: underline;
+}
+.nota-preview-prose [style*="text-align: center"] {
+  text-align: center;
+}
+.nota-preview-prose [style*="text-align: right"] {
+  text-align: right;
+}
+
+/* Cards semânticos no preview (vantagem / desvantagem) */
+.nota-preview-prose .preview-card-vantagem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(63, 185, 80, 0.12);
+  border-left: 4px solid var(--aw-positive);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+}
+.nota-preview-prose .preview-card-vantagem::before {
+  content: "✓";
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: rgba(63, 185, 80, 0.25);
+  color: var(--aw-positive);
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.nota-preview-prose .preview-card-desvantagem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: rgba(248, 81, 73, 0.1);
+  border-left: 4px solid var(--aw-danger);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+}
+.nota-preview-prose .preview-card-desvantagem::before {
+  content: "⚠";
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: rgba(248, 81, 73, 0.2);
+  color: var(--aw-danger);
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Bloco recolhido expandido no preview: mesmo estilo de pre/código */
+.nota-preview-prose .nota-masked-block-expanded {
+  margin: 0.5rem 0;
+}
+.nota-preview-prose .nota-masked-block-content {
+  font-family: ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--aw-pre-bg);
+  color: var(--aw-code-text);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

@@ -1,0 +1,196 @@
+/**
+ * Morcego em pixel art (1px + box-shadow + steps).
+ * Tamanho ampliado; flutuação e partículas vêm do Motion (RestScreenPixelBat.tsx).
+ */
+.rest-screen-bat-outer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rest-screen-bat-stage {
+  position: relative;
+  width: min(20rem, 90vw);
+  height: 13rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--aw-border) 28%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--aw-accent) 12%, transparent),
+    0 12px 40px -12px color-mix(in srgb, var(--aw-accent) 25%, transparent);
+  overflow: visible;
+}
+
+.rest-screen-bat-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 1px;
+  background: var(--aw-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--aw-accent) 45%, transparent);
+  pointer-events: none;
+  z-index: 1;
+  image-rendering: pixelated;
+}
+
+.rest-screen-bat-pixel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 1px;
+  height: 1px;
+  /* ~176×55 px visual — bem maior que antes */
+  transform: scale(11);
+  transform-origin: 0 0;
+  margin-left: -88px;
+  margin-top: -28px;
+  color: var(--aw-accent);
+  background: transparent;
+  filter: drop-shadow(0 2px 12px color-mix(in srgb, var(--aw-accent) 35%, transparent));
+  animation: rest-screen-bat-flap 0.4s steps(1) infinite;
+}
+
+@keyframes rest-screen-bat-flap {
+  0%,
+  100% {
+    box-shadow:
+      0px 0px 0 0 currentColor,
+      1px 0px 0 0 currentColor,
+      2px 0px 0 0 currentColor,
+      3px 0px 0 0 currentColor,
+      4px 0px 0 0 currentColor,
+      11px 0px 0 0 currentColor,
+      12px 0px 0 0 currentColor,
+      13px 0px 0 0 currentColor,
+      14px 0px 0 0 currentColor,
+      15px 0px 0 0 currentColor,
+      1px 1px 0 0 currentColor,
+      2px 1px 0 0 currentColor,
+      3px 1px 0 0 currentColor,
+      4px 1px 0 0 currentColor,
+      5px 1px 0 0 currentColor,
+      6px 1px 0 0 currentColor,
+      7px 1px 0 0 currentColor,
+      8px 1px 0 0 currentColor,
+      9px 1px 0 0 currentColor,
+      10px 1px 0 0 currentColor,
+      11px 1px 0 0 currentColor,
+      12px 1px 0 0 currentColor,
+      13px 1px 0 0 currentColor,
+      14px 1px 0 0 currentColor,
+      6px 2px 0 0 currentColor,
+      7px 2px 0 0 currentColor,
+      8px 2px 0 0 currentColor,
+      9px 2px 0 0 currentColor,
+      7px 3px 0 0 currentColor,
+      8px 3px 0 0 currentColor;
+  }
+  33.33% {
+    box-shadow:
+      2px 0px 0 0 currentColor,
+      3px 0px 0 0 currentColor,
+      12px 0px 0 0 currentColor,
+      13px 0px 0 0 currentColor,
+      1px 1px 0 0 currentColor,
+      2px 1px 0 0 currentColor,
+      3px 1px 0 0 currentColor,
+      4px 1px 0 0 currentColor,
+      5px 1px 0 0 currentColor,
+      6px 1px 0 0 currentColor,
+      7px 1px 0 0 currentColor,
+      8px 1px 0 0 currentColor,
+      9px 1px 0 0 currentColor,
+      10px 1px 0 0 currentColor,
+      11px 1px 0 0 currentColor,
+      12px 1px 0 0 currentColor,
+      13px 1px 0 0 currentColor,
+      14px 1px 0 0 currentColor,
+      5px 2px 0 0 currentColor,
+      6px 2px 0 0 currentColor,
+      7px 2px 0 0 currentColor,
+      8px 2px 0 0 currentColor,
+      9px 2px 0 0 currentColor,
+      10px 2px 0 0 currentColor,
+      6px 3px 0 0 currentColor,
+      7px 3px 0 0 currentColor,
+      8px 3px 0 0 currentColor,
+      9px 3px 0 0 currentColor,
+      7px 4px 0 0 currentColor,
+      8px 4px 0 0 currentColor;
+  }
+  66.66% {
+    box-shadow:
+      1px 1px 0 0 currentColor,
+      2px 1px 0 0 currentColor,
+      3px 1px 0 0 currentColor,
+      4px 1px 0 0 currentColor,
+      5px 1px 0 0 currentColor,
+      6px 1px 0 0 currentColor,
+      7px 1px 0 0 currentColor,
+      8px 1px 0 0 currentColor,
+      9px 1px 0 0 currentColor,
+      10px 1px 0 0 currentColor,
+      11px 1px 0 0 currentColor,
+      12px 1px 0 0 currentColor,
+      13px 1px 0 0 currentColor,
+      14px 1px 0 0 currentColor,
+      0px 2px 0 0 currentColor,
+      1px 2px 0 0 currentColor,
+      2px 2px 0 0 currentColor,
+      3px 2px 0 0 currentColor,
+      4px 2px 0 0 currentColor,
+      11px 2px 0 0 currentColor,
+      12px 2px 0 0 currentColor,
+      13px 2px 0 0 currentColor,
+      14px 2px 0 0 currentColor,
+      15px 2px 0 0 currentColor,
+      6px 2px 0 0 currentColor,
+      7px 2px 0 0 currentColor,
+      8px 2px 0 0 currentColor,
+      9px 2px 0 0 currentColor,
+      7px 3px 0 0 currentColor,
+      8px 3px 0 0 currentColor;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rest-screen-bat-pixel {
+    animation: none;
+    box-shadow:
+      0px 0px 0 0 currentColor,
+      1px 0px 0 0 currentColor,
+      2px 0px 0 0 currentColor,
+      3px 0px 0 0 currentColor,
+      4px 0px 0 0 currentColor,
+      11px 0px 0 0 currentColor,
+      12px 0px 0 0 currentColor,
+      13px 0px 0 0 currentColor,
+      14px 0px 0 0 currentColor,
+      15px 0px 0 0 currentColor,
+      1px 1px 0 0 currentColor,
+      2px 1px 0 0 currentColor,
+      3px 1px 0 0 currentColor,
+      4px 1px 0 0 currentColor,
+      5px 1px 0 0 currentColor,
+      6px 1px 0 0 currentColor,
+      7px 1px 0 0 currentColor,
+      8px 1px 0 0 currentColor,
+      9px 1px 0 0 currentColor,
+      10px 1px 0 0 currentColor,
+      11px 1px 0 0 currentColor,
+      12px 1px 0 0 currentColor,
+      13px 1px 0 0 currentColor,
+      14px 1px 0 0 currentColor,
+      6px 2px 0 0 currentColor,
+      7px 2px 0 0 currentColor,
+      8px 2px 0 0 currentColor,
+      9px 2px 0 0 currentColor,
+      7px 3px 0 0 currentColor,
+      8px 3px 0 0 currentColor;
+  }
+}
