@@ -4,13 +4,23 @@
  */
 
 import dotenv from "dotenv"
+import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const distPath = path.join(__dirname, "..", "dist")
+
+if (process.env.NODE_ENV === "production" && !fs.existsSync(distPath)) {
+  console.warn(
+    "⚠ [AVISO] Pasta dist/ não encontrada. Em produção rode 'npm run build' na raiz do projeto antes de iniciar o servidor."
+  )
+}
+
 dotenv.config({ path: path.join(__dirname, ".env") })
 import express from "express"
 import cors from "cors"
+import morgan from "morgan"
 import { listarSenhas, inserirSenha, atualizarSenha, apagarSenha } from "./db.js"
 import { decrypt, encrypt } from "./crypto.js"
 import * as aw from "./db-another-world.js"
@@ -19,8 +29,23 @@ const app = express()
 const PORT = process.env.PORT || 3001
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
 
-app.use(cors({ origin: ["http://localhost:3000", "http://127.0.0.1:3000"] }))
-app.use(express.json())
+app.set("trust proxy", 1)
+app.use(express.json({ limit: "2mb" }))
+
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim()).filter(Boolean)
+  : []
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true)
+      if (process.env.NODE_ENV === "development") return callback(null, true)
+      if (allowedOrigins.includes(origin)) return callback(null, true)
+      return callback(null, false)
+    },
+  })
+)
+app.use(morgan("combined"))
 
 // Log de duração dos pedidos à API (para diagnosticar latência)
 app.use((req, res, next) => {
@@ -31,13 +56,6 @@ app.use((req, res, next) => {
     if (ms > 500) console.log(`[api] ${req.method} ${req.path} ${res.statusCode} ${ms} ms`)
   })
   next()
-})
-
-// Se abrires http://localhost:3001 no browser, mostra uma dica em vez de "Cannot GET /"
-app.get("/", (req, res) => {
-  res.type("text/plain").send(
-    "API do Another World (senhas). Use o site em http://localhost:3000 e aceda à página Senhas."
-  )
 })
 
 /** Diagnóstico: confirma se o .env está a ser carregado (sem revelar valores). */
@@ -71,7 +89,7 @@ app.get("/api/ping-external", async (_req, res) => {
 })
 
 /** Opcional: recebe eventos de rede do front para observabilidade (timestamp, status, latency, etc.). */
-app.post("/api/network-log", express.json(), (req, res) => {
+app.post("/api/network-log", (req, res) => {
   const body = req.body || {}
   console.log("[network-log]", new Date().toISOString(), JSON.stringify(body))
   res.status(204).send()
@@ -593,6 +611,33 @@ app.put("/api/pomodoro-settings", requireDb, express.json(), async (req, res) =>
   } catch (err) {
     handleAwError(err, res)
   }
+})
+
+// Frontend (build do Vite) — ordem: API primeiro, depois static, depois fallback
+// index: false → index.html não é servido pelo static (evita cache 7d no HTML)
+app.use(
+  express.static(distPath, {
+    maxAge: "7d",
+    etag: true,
+    index: false,
+  })
+)
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) {
+    return res.status(404).json({ error: "Not found" })
+  }
+  res.setHeader("Cache-Control", "no-store")
+  const indexPath = path.join(distPath, "index.html")
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error("Erro ao enviar index.html:", err.message)
+      if (!res.headersSent) {
+        res.status(err.status === 404 ? 404 : 500).type("text/plain").send(
+          "Frontend não disponível. Execute 'npm run build' na raiz do projeto."
+        )
+      }
+    }
+  })
 })
 
 const server = app.listen(PORT, async () => {

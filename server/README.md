@@ -15,6 +15,8 @@ Servidor Express que expõe a API de senhas e as APIs dos dados que antes ficava
    - **ENCRYPTION_KEY**: chave para AES-256 (32 bytes). Exemplo: `openssl rand -hex 32`.
    - **DATABASE_URL**: URL do PostgreSQL (ex.: `postgresql://user:password@localhost:5432/dbname` ou connection string do Supabase).
    - **PORT** (opcional): porta do servidor (default 3001).
+   - **CORS_ORIGIN** (opcional, produção): origens permitidas separadas por vírgula (ex.: `https://teusite.com`). Em desenvolvimento não é necessário.
+   - **NODE_ENV**: em produção use `production`; em dev pode omitir ou usar `development`.
 
 ## Tabela no banco
 
@@ -50,7 +52,7 @@ Para inserir senhas criptografadas, use o módulo `crypto.js` (função `encrypt
 
 Ordem: 1) `schema-another-world-completo.sql` → 2) `schema-aw-imagens.sql`. Depois, se quiser enviar filtros da Mesa ao banco: 3) `schema-mesa-sessoes.sql`. Ambos são idempotentes (pode rodar de novo sem erro). O frontend usa o backend para ler/escrever; se o servidor estiver em baixo, continua a usar localStorage.
 
-## Executar
+## Executar (desenvolvimento)
 
 ```bash
 cd server
@@ -58,4 +60,58 @@ npm install
 npm run dev
 ```
 
-O frontend (Vite) faz proxy de `/api` para `http://localhost:3001`. Mantenha o servidor a correr enquanto usa a página **Senhas** no site.
+O frontend (Vite) faz proxy de `/api` para `http://localhost:3001`. Mantenha o servidor a correr enquanto usa a página **Senhas** no site. O script `npm run dev` define automaticamente `NODE_ENV=development` (via cross-env) para evitar CORS a bloquear localhost.
+
+## Produção (deploy com PM2)
+
+O servidor serve **tudo**: a API em `/api/*` e o frontend (build do Vite) em `/`. Um único processo, um único domínio, sem CORS no dia a dia.
+
+1. **Build do frontend** (na raiz do projeto):
+   ```bash
+   npm run build
+   ```
+   Isto gera a pasta `dist/`.
+
+2. **Iniciar o servidor** (na raiz do projeto, para o caminho `dist` estar correto):
+   ```bash
+   pm2 start server/index.js --name another-world
+   pm2 save
+   pm2 startup   # configura reinício automático após reboot do sistema
+   ```
+   Depois de `pm2 startup`, execute o comando que o PM2 mostrar (ex.: `sudo env PATH=... pm2 startup systemd`). Assim o servidor volta sozinho após reiniciar a máquina.
+
+3. **Variáveis de ambiente** em produção (em `server/.env` ou no PM2):
+   - `NODE_ENV=production`
+   - `CORS_ORIGIN=https://teudominio.com` (o domínio onde o site é acedido)
+   - `PORT`, `DATABASE_URL`, `ENCRYPTION_KEY` como em desenvolvimento
+
+---
+
+## ⚠️ Onde pode parecer que não funcionou
+
+Não é bug da arquitetura — é execução. Confirme estes pontos:
+
+| Problema | Sintoma | Solução |
+|----------|---------|---------|
+| **1. Esqueceu o build** | Site não carrega; só a API responde | Na raiz: `npm run build`. É o erro mais provável em produção. |
+| **2. CORS_ORIGIN não definido em produção** | Browser bloqueia pedidos; parece bug estranho | Em `server/.env`: `CORS_ORIGIN=https://teudominio.com` (o domínio real do site). |
+| **3. Pasta `dist` não existe no servidor** | 404 no frontend; API funciona | O servidor mostra um aviso no arranque. Rode `npm run build` na raiz e reinicie. |
+| **4. Dev sem NODE_ENV=development** | CORS a bloquear localhost | Use `npm run dev` no `server/` (já define NODE_ENV=development). Ou defina `CORS_ORIGIN=http://localhost:3000` no `.env` de dev. |
+
+---
+
+## Melhorias implementadas
+
+### Melhorias sugeridas e implementadas por mim
+
+- **Aviso ao arranque em produção:** Se `NODE_ENV=production` e a pasta `dist/` não existir, o servidor mostra um aviso no console para rodar `npm run build` antes de iniciar.
+- **Resposta controlada quando `index.html` falha:** O fallback SPA usa um callback em `sendFile`: em caso de erro (ficheiro em falta ou outro), responde com 404/500 e a mensagem "Frontend não disponível. Execute 'npm run build' na raiz do projeto." em vez de deixar o Express enviar uma página de erro genérica.
+- **Remoção de `express.json()` redundante:** A rota `POST /api/network-log` não usa mais `express.json()` no meio da rota; o body já é parseado pelo middleware global.
+- **Documentação de CORS e NODE_ENV:** No README ficou explícito que em produção é obrigatório definir `CORS_ORIGIN` e que em dev o script `npm run dev` já define `NODE_ENV=development`.
+
+### Melhorias sugeridas pelo ChatGPT e efetuadas por mim
+
+- **1. Esqueceu o build:** Documentado na secção "Onde pode parecer que não funcionou" e no passo 1 de Produção; aviso no arranque em produção quando `dist/` não existe; mensagem clara no fallback quando `index.html` falha.
+- **2. CORS_ORIGIN não definido em produção:** Incluído no checklist de variáveis de produção no README e na tabela de "Onde pode parecer que não funcionou" com a solução `CORS_ORIGIN=https://teudominio.com`.
+- **3. `dist` não existe no servidor:** Aviso no arranque (produção) e resposta controlada no fallback (404/500 + mensagem) quando o ficheiro não pode ser enviado.
+- **4. Dev sem NODE_ENV=development:** Script `npm run dev` no `server` passou a usar `cross-env NODE_ENV=development node index.js`, para que localhost não seja bloqueado por CORS em desenvolvimento, sem depender de variáveis no sistema.
